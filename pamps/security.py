@@ -1,5 +1,7 @@
 """Security utilities"""
 from passlib.context import CryptContext
+from pydantic import GetCoreSchemaHandler
+from pydantic_core import core_schema
 
 from pamps.config import settings
 
@@ -29,11 +31,14 @@ class HashedPassword(str):
     """
 
     @classmethod
-    def __get_validators__(cls):
-        # one or more validators may be yielded which will be called in the
-        # order to validate the input, each validator will receive as an input
-        # the value returned from the previous validator
-        yield cls.validate
+    def __get_pydantic_core_schema__(
+        cls, source_type, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        # hook do pydantic v2: roda `validate` depois que o valor passa
+        # pela validação básica de string
+        return core_schema.no_info_after_validator_function(
+            cls.validate, core_schema.str_schema()
+        )
 
     @classmethod
     def validate(cls, v):

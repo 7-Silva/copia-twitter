@@ -2,13 +2,14 @@ import typer
 from rich.console import Console
 from rich.table import Table
 from sqlmodel import Session, select
+from faker import Faker
 
 from .config import settings
 from .db import engine
 from .models import User
 
 main = typer.Typer(name="Pamps CLI")
-
+fake = Faker("pt_BR")
 
 @main.command()
 def shell():
@@ -54,3 +55,25 @@ def create_user(email: str, username: str, password: str):
         session.refresh(user)
         typer.echo(f"created {username} user")
         return user
+
+@main.command()
+def create_user_random(
+    quantidade: int = typer.Option(
+        1, "--quantidade", "-q", help="Quantos usuários aleatórios criar"
+    ),
+):
+    """Create one or more users with random data"""
+    with Session(engine) as session:
+        for _ in range(quantidade):
+            username = fake.user_name()
+            user = User(
+                email=fake.unique.email(),
+                username=username,
+                password=fake.password(length=12),
+                bio=fake.sentence(),
+                avatar=fake.image_url(),
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+            typer.echo(f"created {username} user")    
