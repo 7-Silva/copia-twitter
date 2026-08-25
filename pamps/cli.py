@@ -7,6 +7,7 @@ from faker import Faker
 from .config import settings
 from .db import engine
 from .models import User
+from .models.user import UserRequest
 
 main = typer.Typer(name="Pamps CLI")
 fake = Faker("pt_BR")
@@ -47,9 +48,10 @@ def user_list():
 
 @main.command()
 def create_user(email: str, username: str, password: str):
-    """Create user"""
+    """Create user teste 2"""
     with Session(engine) as session:
-        user = User(email=email, username=username, password=password)
+        request = UserRequest(email=email, username=username, password=password)
+        user = User.model_validate(request)
         session.add(user)
         session.commit()
         session.refresh(user)
@@ -66,14 +68,15 @@ def create_user_random(
     with Session(engine) as session:
         for _ in range(quantidade):
             username = fake.user_name()
-            user = User(
+            request = UserRequest(
                 email=fake.unique.email(),
                 username=username,
                 password=fake.password(length=12),
                 bio=fake.sentence(),
                 avatar=fake.image_url(),
             )
+            user = User.model_validate(request)
             session.add(user)
             session.commit()
             session.refresh(user)
-            typer.echo(f"created {username} user")    
+            typer.echo(f"created {username} user")
