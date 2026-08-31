@@ -64,9 +64,7 @@ async def create_post(
 ):
     """Creates new post"""
 
-    post.user_id = user.id
-
-    db_post = Post.from_orm(post)  # transform PostRequest in Post
+    db_post = Post(**post.model_dump(), user_id=user.id)
     session.add(db_post)
     session.commit()
     session.refresh(db_post)

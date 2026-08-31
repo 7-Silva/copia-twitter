@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -43,7 +43,7 @@ class PostResponse(BaseModel):
     text: str
     date: datetime
     user_id: int
-    parent_id: Optional[int]
+    parent_id: Optional[int] = None
 
 
 class PostResponseWithReplies(PostResponse):
@@ -56,9 +56,5 @@ class PostResponseWithReplies(PostResponse):
 class PostRequest(BaseModel):
     """Serializer for Post request payload"""
 
-    parent_id: Optional[int]
+    parent_id: Optional[int] = None
     text: str
-
-    class Config:
-        extra = Extra.allow
-        arbitrary_types_allowed = True
